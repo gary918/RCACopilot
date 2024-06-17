@@ -1,0 +1,5 @@
+streamlit
+st-pages
+langchain
+langchain-openai
+langchain-community
