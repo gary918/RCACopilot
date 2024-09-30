@@ -1,0 +1,115 @@
+id: bring_your_own_data_qna
+name: Bring Your Own Data QnA
+environment:
+  python_requirements_txt: requirements.txt
+inputs:
+  question:
+    type: string
+    default: what is the engine's temperature range?
+    is_chat_input: false
+outputs:
+  output:
+    type: string
+    reference: ${answer_the_question_with_context.output}
+nodes:
+- name: lookup
+  type: python
+  source:
+    type: package
+    tool: promptflow_vectordb.tool.common_index_lookup.search
+  inputs:
+    mlindex_content: >
+      embeddings:
+        api_base: https://garyaoai-gpt4.openai.azure.com/
+        api_type: azure
+        api_version: 2023-07-01-preview
+        batch_size: '1'
+        connection:
+          id: /subscriptions/576e331b-409d-4fac-ab60-725c34b8bd74/resourceGroups/rg-ganwaai/providers/Microsoft.MachineLearningServices/workspaces/ganwa-4035/connections/garyaoai-gpt4
+        connection_type: workspace_connection
+        deployment: text-embedding-ada-002
+        dimension: 1536
+        kind: open_ai
+        model: text-embedding-ada-002
+        schema_version: '2'
+      index:
+        api_version: 2024-05-01-preview
+        connection:
+          id: /subscriptions/576e331b-409d-4fac-ab60-725c34b8bd74/resourceGroups/rg-ganwaai/providers/Microsoft.MachineLearningServices/workspaces/ganwa-4035/connections/garysearch
+        connection_type: workspace_connection
+        endpoint: https://garysearch.search.windows.net/
+        engine: azure-sdk
+        field_mapping:
+          content: content
+          embedding: contentVector
+          metadata: null
+        index: stayindex5
+        kind: acs
+        semantic_configuration_name: default
+    queries: ${inputs.question}
+    query_type: Hybrid (vector + keyword)
+    top_k: 2
+  use_variants: false
+- name: generate_prompt_context
+  type: python
+  source:
+    type: code
+    path: generate_prompt_context.py
+  inputs:
+    search_result: ${lookup.output}
+  use_variants: false
+- name: Prompt_variants
+  use_variants: true
+- name: answer_the_question_with_context
+  type: llm
+  source:
+    type: code
+    path: answer_the_question_with_context.jinja2
+  inputs:
+    deployment_name: gpt-4-32k
+    temperature: 0.2
+    top_p: 1
+    max_tokens: 1000
+    response_format:
+      type: text
+    presence_penalty: 0
+    frequency_penalty: 0
+    echo: false
+    best_of: 1
+    prompt_text: ${Prompt_variants.output}
+  provider: AzureOpenAI
+  connection: garyaoaigpt4
+  api: chat
+  module: promptflow.tools.aoai
+  use_variants: false
+node_variants:
+  Prompt_variants:
+    default_variant_id: variant_0
+    variants:
+      variant_0:
+        node:
+          type: prompt
+          source:
+            type: code
+            path: Prompt_variants.jinja2
+          inputs:
+            contexts: ${generate_prompt_context.output}
+            question: ${inputs.question}
+      variant_1:
+        node:
+          type: prompt
+          source:
+            type: code
+            path: Prompt_variants__variant_1.jinja2
+          inputs:
+            contexts: ${generate_prompt_context.output}
+            question: ${inputs.question}
+      variant_2:
+        node:
+          type: prompt
+          source:
+            type: code
+            path: Prompt_variants__variant_2.jinja2
+          inputs:
+            contexts: ${generate_prompt_context.output}
+            question: ${inputs.question}

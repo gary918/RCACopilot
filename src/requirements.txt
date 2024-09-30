@@ -3,3 +3,11 @@ st-pages
 langchain
 langchain-openai
 langchain-community
+promptflow==1.9.0
+promptflow-azure==1.9.0
+promptflow-core==1.9.0
+promptflow-devkit==1.9.0
+promptflow-tools==1.4.0
+promptflow-tracing==1.9.0
+promptflow_vectordb==0.2.10
+azure-ai-ml==1.16.1

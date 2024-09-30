@@ -1,0 +1,65 @@
+inputs:
+  question:
+    type: string
+    default: How to use SDK V2?
+    is_chat_input: false
+outputs:
+  output:
+    type: string
+    reference: ${answer_the_question_with_context.output}
+    evaluation_only: false
+    is_chat_output: false
+nodes:
+- name: lookup
+  type: python
+  source:
+    type: package
+    tool: promptflow_vectordb.tool.common_index_lookup.search
+  inputs:
+    mlindex_content: "embeddings:\n  api_base: https://garyaoai-gpt4.openai.azure.com/\n  api_type: azure\n  api_version: 2023-07-01-preview\n  batch_size: '1'\n  connection:\n    id: /subscriptions/576e331b-409d-4fac-ab60-725c34b8bd74/resourceGroups/rg-ganwaai/providers/Microsoft.MachineLearningServices/workspaces/ganwa-4035/connections/garyaoai-gpt4\n  connection_type: workspace_connection\n  deployment: text-embedding-ada-002\n  dimension: 1536\n  kind: open_ai\n  model: text-embedding-ada-002\n  schema_version: '2'\nindex:\n  api_version: 2024-05-01-preview\n  connection:\n    id: /subscriptions/576e331b-409d-4fac-ab60-725c34b8bd74/resourceGroups/rg-ganwaai/providers/Microsoft.MachineLearningServices/workspaces/ganwa-4035/connections/garysearch\n  connection_type: workspace_connection\n  endpoint: https://garysearch.search.windows.net/\n  engine: azure-sdk\n  field_mapping:\n    content: content\n    embedding: contentVector\n    metadata: null\n  index: stayindex5\n  kind: acs\n  semantic_configuration_name: default\n"
+    queries: "${inputs.question}"
+    query_type: "Hybrid (vector + keyword)"
+    top_k: 2
+  aggregation: false
+- name: generate_prompt_context
+  type: python
+  source:
+    type: code
+    path: generate_prompt_context.py
+  inputs:
+    search_result: "${lookup.output}"
+  aggregation: false
+- name: answer_the_question_with_context
+  type: llm
+  source:
+    type: code
+    path: answer_the_question_with_context.jinja2
+  inputs:
+    deployment_name: "gpt-4-32k"
+    temperature: 0.2
+    top_p: 1
+    max_tokens: 1000
+    response_format:
+      type: text
+    presence_penalty: 0
+    frequency_penalty: 0
+    suffix: ""
+    echo: false
+    best_of: 1
+    prompt_text: "${Prompt_variants.output}"
+  api: chat
+  provider: AzureOpenAI
+  connection: garyaoaigpt4
+  module: promptflow.tools.aoai
+  aggregation: false
+- name: Prompt_variants
+  type: prompt
+  source:
+    type: code
+    path: Prompt_variants.jinja2
+  inputs:
+    contexts: "${generate_prompt_context.output}"
+    question: "${inputs.question}"
+  aggregation: false
+environment:
+  python_requirements_txt: requirements.txt

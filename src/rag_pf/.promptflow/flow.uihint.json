@@ -1,0 +1,80 @@
+{
+  "nodes": {
+    "lookup": {
+      "variant_0": {
+        "inputs": {
+          "acs_content_field": [
+            {
+              "display_value": "content",
+              "value": "content"
+            }
+          ],
+          "acs_embedding_field": [
+            {
+              "display_value": "contentVector",
+              "value": "contentVector"
+            }
+          ],
+          "acs_metadata_field": [],
+          "embedding_type": [
+            {
+              "displayValue": "Azure OpenAI",
+              "value": "Azure OpenAI"
+            }
+          ],
+          "embedding_deployment": [
+            {
+              "display_value": "text-embedding-ada-002",
+              "value": "text-embedding-ada-002"
+            }
+          ],
+          "embedding_model": [],
+          "mlindex_asset_id": [],
+          "pinecone_index_connection": [],
+          "pinecone_index_name": [],
+          "semantic_configuration": [
+            {
+              "value": "default"
+            }
+          ],
+          "query_type": [
+            {
+              "display_value": "Hybrid (vector + keyword)",
+              "value": "Hybrid (vector + keyword)"
+            }
+          ]
+        },
+        "inputsValue": {
+          "index_type": "Azure AI Search",
+          "acs_index_connection": "garysearch",
+          "acs_content_field": "content",
+          "acs_embedding_field": "contentVector",
+          "acs_index_name": "stayindex5",
+          "embedding_type": "Azure OpenAI",
+          "aoai_embedding_connection": "garyaoai-gpt4",
+          "embedding_deployment": "text-embedding-ada-002",
+          "semantic_configuration": "default",
+          "acs_metadata_field": null
+        }
+      }
+    },
+    "generate_prompt_context": {
+      "variant_0": {
+        "inputs": {},
+        "inputsValue": {}
+      }
+    },
+    "Prompt_variants": {
+      "variant_0": {
+        "inputs": {},
+        "inputsValue": {}
+      }
+    },
+    "answer_the_question_with_context": {
+      "variant_0": {
+        "inputs": {},
+        "inputsValue": {}
+      }
+    }
+  }
+}
